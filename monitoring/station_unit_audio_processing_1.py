@@ -1,10 +1,11 @@
+from fastapi import FastAPI, UploadFile, BackgroundTasks
 import os
-import time
 import requests
 import json
 import logging
 from collections import defaultdict
 from datetime import datetime
+import shutil
 
 # Set up logging
 log_dir = '../../logs'
@@ -15,6 +16,14 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+app = FastAPI()
+
+# Configuration
+service_url = 'http://localhost:5000/predict/'
+base_folder = '/home/work/Input/'
+output_folder = '/home/work/Output/'
+processed_files_path = 'processed_files.txt'
 
 def test_audio_prediction(audio_file_path, url, output_folder, pi_id, date, processed_files):
     """
@@ -125,26 +134,22 @@ def save_processed_files(file_path, processed_files):
         for file_path, finish_time in processed_files.items():
             f.write(f"{file_path},{finish_time}\n")
 
-def main():
-    service_url = 'http://172.16.3.192:5000/predict/'
-    base_folder = 'continuous_monitoring_data/live_data/RPiID-00000000b36010d2/'
-    output_folder = 'output'
-    processed_files_path = 'processed_files.txt'
+@app.post("/upload/")
+async def upload_audio_file(file: UploadFile, background_tasks: BackgroundTasks):
+    """
+    Endpoint to receive an audio file and process it in the background.
+    """
+    file_path = os.path.join(base_folder, file.filename)
     
-    # Load previously processed files
-    processed_files = load_processed_files(processed_files_path)
+    # Save the uploaded file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    # Process the file in the background
+    background_tasks.add_task(process_all_sites, base_folder, service_url, output_folder, processed_files_path)
+    
+    return {"message": f"File {file.filename} uploaded and processing started."}
 
-    while True:
-        logging.info("Starting new processing cycle...")
-        files_processed = process_all_sites(base_folder, service_url, output_folder, processed_files_path)
-        
-        if files_processed:
-            # Save the updated set of processed files
-            save_processed_files(processed_files_path, processed_files)
-        else:
-            logging.info("No new files to process. Sleeping for 60 seconds...")
-        
-        time.sleep(60)  # Wait before checking again
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
