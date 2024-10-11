@@ -28,12 +28,13 @@ services:
     environment:
       DB_URL: "mysql+mysqlconnector://biosound_user:biosound_password@biosound_db/species_db"
     volumes:
-      - ./continuous_monitoring_data:/app/data
+      - /home/ubuntu/continuous_monitoring_data:/app/data
     networks:
       - biosound_network
     entrypoint: ["/bin/bash"]
     stdin_open: true  
-    tty: true 
+    tty: true
+    shm_size: '1g' 
 
 networks:
   biosound_network:

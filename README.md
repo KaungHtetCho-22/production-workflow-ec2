@@ -38,7 +38,13 @@ This is the repository for the production workflow on AWS-EC2 for the Biodiversi
 
 ## How to Run
 
-### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/yourusername/production-workflow-ec2.git
+git clone https://github.com/KaungHtetCho-22/production-workflow-ec2.git
 cd production-workflow-ec2
+docker compose up -d
+docker exec -it audio_prcessor /bin/bash
+cd audio_processor
+python3 audio_processor.py
+
+docker exec -it biosound_db /bin/bash
+mysql -h localhost -P 3306 -u biosound_user -p biosound_password

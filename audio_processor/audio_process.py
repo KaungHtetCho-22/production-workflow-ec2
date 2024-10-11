@@ -16,12 +16,12 @@ from watchdog.events import FileSystemEventHandler
 import time
 from datetime import datetime, timedelta
 
-# Import database setup and models
 from sqlmodel import create_engine_and_session, RpiDevices, SpeciesDetection
 
 warnings.filterwarnings("ignore")
 
-ROOT_AUDIO_DIR = 'continuous_monitoring_data/live_data/'  # Root directory to monitor
+ROOT_AUDIO_DIR = './data/live_data'  # Root directory to monitor
+print('pwd: {pwd}')
 
 sys.path.append('./configs')
 CFG = copy(importlib.import_module("ait_bird_local").cfg)  # Load config file
@@ -42,6 +42,7 @@ model = AttModel(
 model.load_state_dict(state_dict)
 model = model.to(device)
 model.logmelspec_extractor = model.logmelspec_extractor.to(device)
+print("Model initialized successfully.")
 
 # Create engine and session for database
 engine, session = create_engine_and_session()
@@ -138,13 +139,32 @@ def save_to_database(pi_id, date, species_data, session):
     finally:
         session.close()
 
+#def process_new_audio(audio_path):
+#    print(f"Processing: {audio_path}")
+#    classification_dict = prediction_for_clip(audio_path)
+    
+    # Extract IoT device name and date from the path
+#    iot_name = Path(audio_path).parts[-3]
+#    date = Path(audio_path).parts[-2]
+
+    # Save directly to the database
+#    save_to_database(iot_name, date, classification_dict, session)
+
 def process_new_audio(audio_path):
     print(f"Processing: {audio_path}")
-    classification_dict = prediction_for_clip(audio_path)
     
+    # Check if audio file exists and can be loaded
+    if not os.path.isfile(audio_path):
+        print(f"Audio file not found: {audio_path}")
+        return
+
+    classification_dict = prediction_for_clip(audio_path)
+    print(f"Classification results: {classification_dict}")
+
     # Extract IoT device name and date from the path
     iot_name = Path(audio_path).parts[-3]
     date = Path(audio_path).parts[-2]
+    print(f"Extracted IoT name: {iot_name}, date: {date}")
 
     # Save directly to the database
     save_to_database(iot_name, date, classification_dict, session)
