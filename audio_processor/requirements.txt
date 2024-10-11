@@ -6,4 +6,6 @@ watchdog==2.1.9
 jsonschema==4.17.3 
 sqlalchemy==2.0.12  
 mysql-connector-python==8.0.33 
-torchaudio==2.3.1
+torchaudio
+torch
+timm

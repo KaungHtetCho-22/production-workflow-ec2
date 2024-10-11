@@ -35,9 +35,8 @@ def create_engine_and_session():
     return engine, Session()
 
 def initialize_database(engine):
-    Base.metadata.drop_all(engine)  # This will drop all tables
-    Base.metadata.create_all(engine)  # This will create the tables again
-    print("Connected and created tables.")
+    Base.metadata.create_all(engine)  
+    print("Connected and created tables if they didn't exist.")
 
 
 # Create engine and session

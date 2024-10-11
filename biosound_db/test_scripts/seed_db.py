@@ -1,5 +1,5 @@
 import json
-from model import create_engine_and_session, RpiDevices, SpeciesDetection
+from sqlmodel import create_engine_and_session, RpiDevices, SpeciesDetection
 from datetime import datetime
 from datetime import timedelta
 
@@ -67,7 +67,3 @@ with open(json_path, 'r') as file:
     json_data = json.load(file)
 
 seed_data(json_data)
-
-
-
-

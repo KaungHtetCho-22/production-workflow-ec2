@@ -2,6 +2,7 @@ import os
 import warnings
 from pathlib import Path
 import numpy as np
+import pandas as pd
 import librosa
 import torch
 from tqdm.auto import tqdm
@@ -16,7 +17,7 @@ import time
 from datetime import datetime, timedelta
 
 # Import database setup and models
-from model import create_engine_and_session, RpiDevices, SpeciesDetection
+from sqlmodel import create_engine_and_session, RpiDevices, SpeciesDetection
 
 warnings.filterwarnings("ignore")
 
@@ -41,7 +42,6 @@ model = AttModel(
 model.load_state_dict(state_dict)
 model = model.to(device)
 model.logmelspec_extractor = model.logmelspec_extractor.to(device)
-print(model)
 
 # Create engine and session for database
 engine, session = create_engine_and_session()
