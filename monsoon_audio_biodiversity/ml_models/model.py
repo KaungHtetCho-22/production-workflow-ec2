@@ -118,7 +118,7 @@ class AttModel(nn.Module):
         )
 
         base_model = timm.create_model(
-            backbone,
+                ,
             features_only=False,
             pretrained=self.cfg.use_imagenet_weights and training,
             in_chans=self.cfg.in_channels,

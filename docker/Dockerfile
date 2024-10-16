@@ -8,7 +8,3 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # CMD ["python", "audio_process.py"]
-
-# CMD ["bin", "bash"]
-
-# CMD ["python", "sqlmodel.py", "&&", "python", "audio_process.py"]

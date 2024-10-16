@@ -10,7 +10,7 @@ import sys
 from copy import copy
 import importlib
 from dataset import TestDataset
-from model import AttModel
+from monsoon_audio_biodiversity.ml_models.model import AttModel
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import time
