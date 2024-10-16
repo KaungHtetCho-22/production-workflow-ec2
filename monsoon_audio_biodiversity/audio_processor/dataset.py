@@ -1,16 +1,14 @@
 import torch
 import pandas as pd
 import numpy as np
-import librosa
-import os
+
 
 class TestDataset(torch.utils.data.Dataset):
-    def __init__(self, 
-                 df: pd.DataFrame, 
+    def __init__(self,
+                 df: pd.DataFrame,
                  clip: np.ndarray,
-                 cfg=None,
-                ):
-        
+                 cfg=None):
+
         self.df = df
         self.clip = clip
         self.sr = cfg.sample_rate
@@ -26,9 +24,9 @@ class TestDataset(torch.utils.data.Dataset):
 
         end_seconds = int(sample.seconds)
         start_seconds = int(end_seconds - 5)
-        
-        wave = self.clip[self.sr * start_seconds : self.sr * end_seconds].astype(np.float32)
-            
+
+        wave = self.clip[self.sr * start_seconds: self.sr * end_seconds].astype(np.float32)
+
         return {
             "row_id": row_id,
             "wave": wave,
@@ -36,4 +34,3 @@ class TestDataset(torch.utils.data.Dataset):
             "loss_target": torch.ones(1),
             "embedding": torch.rand(264).unsqueeze(0),
         }
-

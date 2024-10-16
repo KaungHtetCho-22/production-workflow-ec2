@@ -1,4 +1,4 @@
-files: 'first_steps/.+.py|infer/.+.py|train_audio/.+.py'
+files: 'monsoon_audio_biodiversity/.+.py'
 repos:
   - repo: https://github.com/pycqa/flake8
     rev: '7.1.1'  # pick a git hash / tag to point to
