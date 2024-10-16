@@ -11,6 +11,7 @@ from copy import copy
 import importlib
 from dataset import TestDataset
 from monsoon_audio_biodiversity.ml_models.model import AttModel
+from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import time
@@ -20,14 +21,11 @@ from sqlmodel import create_engine_and_session, RpiDevices, SpeciesDetection
 
 warnings.filterwarnings("ignore")
 
-ROOT_AUDIO_DIR = './data/live_data'  # Root directory to monitor
-print('pwd: {pwd}')
-
-sys.path.append('./configs')
-CFG = copy(importlib.import_module("ait_bird_local").cfg)  # Load config file
+ROOT_AUDIO_DIR = '/app/audio_data'  # Root directory to monitor
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-state_dict = torch.load('./weights/ait_bird_local_eca_nfnet_l0/fold_0_model.pt', map_location=device)['state_dict']
+# TODO: Load the model weights from the correct path
+# state_dict = torch.load('./weights/ait_bird_local_eca_nfnet_l0/fold_0_model.pt', map_location=device)['state_dict']
 
 # Initialize the model
 model = AttModel(
@@ -39,7 +37,7 @@ model = AttModel(
     device=device
 )
 
-model.load_state_dict(state_dict)
+# model.load_state_dict(state_dict)
 model = model.to(device)
 model.logmelspec_extractor = model.logmelspec_extractor.to(device)
 print("Model initialized successfully.")
