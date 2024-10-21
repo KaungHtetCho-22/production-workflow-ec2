@@ -14,7 +14,7 @@ from watchdog.observers import Observer
 from dataset import TestDataset
 from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
 from monsoon_audio_biodiversity.ml_models.model import AttModel
-from sqlmodel import create_engine_and_session, RpiDevices, SpeciesDetection
+from sqlmodel import create_session, RpiDevices, SpeciesDetection
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -35,9 +35,6 @@ model = AttModel(
 model = model.to(device)
 model.logmelspec_extractor = model.logmelspec_extractor.to(device)
 print("Model initialized successfully.")
-
-# Create engine and session for database
-engine, session = create_engine_and_session()
 
 
 def prediction_for_clip(audio_path):
@@ -87,51 +84,50 @@ def prediction_for_clip(audio_path):
     return classification_dict
 
 
-def save_to_database(pi_id, date, species_data, session):
-    try:
-        # Check if device record exists
-        existing_device = session.query(RpiDevices).filter_by(
-            pi_id=pi_id,
-            analysis_date=datetime.strptime(date, '%Y-%m-%d').date()
-        ).first()
+def save_to_database(pi_id, date, species_data):
+    with create_session() as session:
+        try:
+            # Check if device record exists
+            existing_device = session.query(RpiDevices).filter_by(
+                pi_id=pi_id,
+                analysis_date=datetime.strptime(date, '%Y-%m-%d').date()
+            ).first()
 
-        if existing_device:
-            print(f"Device record already exists for {pi_id} on {date}. Skipping insertion.")
-            return
+            if existing_device:
+                print(f"Device record already exists for {pi_id} on {date}. Skipping insertion.")
+                return
 
-        # Create new device record
-        new_device = RpiDevices(
-            pi_id=pi_id,
-            analysis_date=datetime.strptime(date, '%Y-%m-%d')
-        )
-        session.add(new_device)
-        session.flush()
-
-        # Save species detection records
-        for time_segment, detection_data in species_data.items():
-            time_str = time_segment.split('_')[0]  # Extract HH-MM-SS
-            hour, minute, second = map(int, time_str.split('-'))
-            start_time = datetime.strptime(date, '%Y-%m-%d') + timedelta(hours=hour, minutes=minute, seconds=second)
-            end_time = start_time + timedelta(seconds=5)
-
-            species_detection = SpeciesDetection(
-                device_id=new_device.id,
-                time_segment=time_segment,
-                start_time=start_time,
-                end_time=end_time,
-                species_class=detection_data['Class'],
-                confidence_score=detection_data['Score']
+            # Create new device record
+            new_device = RpiDevices(
+                pi_id=pi_id,
+                analysis_date=datetime.strptime(date, '%Y-%m-%d')
             )
-            session.add(species_detection)
+            session.add(new_device)
+            session.flush()
 
-        session.commit()
-        print(f"Successfully added data for {new_device.pi_id} on {new_device.analysis_date}")
+            # Save species detection records
+            for time_segment, detection_data in species_data.items():
+                time_str = time_segment.split('_')[0]  # Extract HH-MM-SS
+                hour, minute, second = map(int, time_str.split('-'))
+                start_time = datetime.strptime(date, '%Y-%m-%d') + timedelta(hours=hour, minutes=minute, seconds=second)
+                end_time = start_time + timedelta(seconds=5)
 
-    except Exception as e:
-        session.rollback()
-        print(f"Error saving data: {str(e)}")
-    finally:
-        session.close()
+                species_detection = SpeciesDetection(
+                    device_id=new_device.id,
+                    time_segment=time_segment,
+                    start_time=start_time,
+                    end_time=end_time,
+                    species_class=detection_data['Class'],
+                    confidence_score=detection_data['Score']
+                )
+                session.add(species_detection)
+
+            session.commit()
+            print(f"Successfully added data for {new_device.pi_id} on {new_device.analysis_date}")
+
+        except Exception as e:
+            session.rollback()
+            print(f"Error saving data: {str(e)}")
 
 
 def process_new_audio(audio_path):
@@ -143,7 +139,7 @@ def process_new_audio(audio_path):
         return
 
     classification_dict = prediction_for_clip(audio_path)
-    print(f"Classification results: {classification_dict}")
+    print("Finished classify audio")
 
     # Extract IoT device name and date from the path
     iot_name = Path(audio_path).parts[-3]
@@ -151,7 +147,7 @@ def process_new_audio(audio_path):
     print(f"Extracted IoT name: {iot_name}, date: {date}")
 
     # Save directly to the database
-    save_to_database(iot_name, date, classification_dict, session)
+    save_to_database(iot_name, date, classification_dict)
 
 
 class AudioFileHandler(FileSystemEventHandler):

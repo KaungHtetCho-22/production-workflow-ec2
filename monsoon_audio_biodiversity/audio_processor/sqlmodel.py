@@ -1,6 +1,19 @@
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
+
+APP_DATA_DIR = os.getenv('APP_DATA_DIR')
+if not APP_DATA_DIR:
+    raise Exception("Environment variable APP_DATA_DIR not set.")
+if not os.path.isdir(APP_DATA_DIR):
+    raise Exception(f"Directory {APP_DATA_DIR} not found.")
+if APP_DATA_DIR.endswith('/'):
+    APP_DATA_DIR = APP_DATA_DIR[:-1]
+
+DATABASE_URL = f'sqlite:///{APP_DATA_DIR}/sql_app.db'
+engine = create_engine(DATABASE_URL)
+create_session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
@@ -31,20 +44,4 @@ class SpeciesDetection(Base):
     device = relationship("RpiDevices", back_populates="detections")
 
 
-# Database connection setup
-def create_engine_and_session():
-    DATABASE_URL = "mysql+mysqlconnector://biosound_user:biosound_password@biosound_db/species_db"
-    engine = create_engine(DATABASE_URL, echo=True)
-    Session = sessionmaker(bind=engine)
-    return engine, Session()
-
-
-def initialize_database(engine):
-    Base.metadata.drop_all(engine)  # This will drop all tables
-    Base.metadata.create_all(engine)  # This will create the tables again
-    print("Connected and created tables.")
-
-
-if __name__ == "__main__":
-    engine, session = create_engine_and_session()
-    initialize_database(engine)
+Base.metadata.create_all(bind=engine)
