@@ -1,0 +1,18 @@
+services:
+  audio_processor:
+    image: monsoon-audio-biodiversity:devel
+    container_name: audio_processor
+    stdin_open: true
+    tty: true
+    shm_size: '1g'
+    working_dir: ${PWD}
+    environment:
+      - PYTHONPATH=${PWD}
+    volumes:
+      - ${PWD}:${PWD}
+      - ${AUDIO_DATA_DIR}:/app/audio_data
+    entrypoint: ["/bin/bash"]
+
+
+volumes:
+  db_data:
