@@ -15,7 +15,6 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - biosound_network
-
   audio_processor:
     build: 
       context: ..
@@ -30,14 +29,10 @@ services:
       - ${AUDIO_DATA_DIR}:/app/audio_data
     networks:
       - biosound_network
-    entrypoint: ["/bin/bash"]
-    stdin_open: true  
-    tty: true
-    shm_size: '1g' 
+    shm_size: '1g'
 
 networks:
   biosound_network:
-    driver: bridge
 
 volumes:
   db_data:
