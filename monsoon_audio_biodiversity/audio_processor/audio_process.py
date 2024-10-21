@@ -1,6 +1,5 @@
 import os
 import time
-import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -17,10 +16,6 @@ from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cf
 from monsoon_audio_biodiversity.ml_models.model import AttModel
 from sqlmodel import create_engine_and_session, RpiDevices, SpeciesDetection
 
-
-warnings.filterwarnings("ignore")
-
-ROOT_AUDIO_DIR = '/app/audio_data'  # Root directory to monitor
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # TODO: Load the model weights from the correct path
@@ -184,4 +179,12 @@ def monitor_directory(root_dir):
     observer.join()
 
 
-monitor_directory(ROOT_AUDIO_DIR)
+if __name__ == '__main__':
+    audio_data_dir = os.getenv('AUDIO_DATA_DIR')
+    if not audio_data_dir:
+        raise Exception("Environment variable AUDIO_DATA_DIR not set.")
+
+    if not os.path.isdir(audio_data_dir):
+        raise Exception(f"Directory {audio_data_dir} not found.")
+
+    monitor_directory(audio_data_dir)
