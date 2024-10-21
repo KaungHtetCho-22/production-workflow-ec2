@@ -1,25 +1,28 @@
+import importlib
+import json
 import os
+import sys
+import time
 import warnings
+from copy import copy
 from pathlib import Path
-import numpy as np
-import pandas as pd
+
 import librosa
 import torch
-from tqdm.auto import tqdm
-import sys
-from copy import copy
-import importlib
-from dataset import TestDataset
-from model import AttModel
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import time
-import json
+
+from dataset import TestDataset
+from monsoon_audio_biodiversity.ml_models.model import AttModel
+
 
 warnings.filterwarnings("ignore")
 
-ROOT_AUDIO_DIR = 'continuous_monitoring_data/live_data/'  
-EXPORT_DIR = './exports/'  
+ROOT_AUDIO_DIR = 'continuous_monitoring_data/live_data/'
+EXPORT_DIR = './exports/'
 
 sys.path.append('./configs')
 CFG = copy(importlib.import_module("ait_bird_local").cfg)  # Load config file
@@ -42,6 +45,7 @@ model = model.to(device)
 model.logmelspec_extractor = model.logmelspec_extractor.to(device)
 print(model)
 
+
 def prediction_for_clip(audio_path):
     prediction_dict = {}
     classification_dict = {}
@@ -49,7 +53,7 @@ def prediction_for_clip(audio_path):
     clip, _ = librosa.load(audio_path, sr=32000)
     duration = librosa.get_duration(y=clip, sr=32000)
     seconds = list(range(5, int(duration), 5))
-    
+
     filename = Path(audio_path).stem
     row_ids = [filename + f"_dur={int(duration)}secs_{second}" for second in seconds]  # Include duration in row_id
 
@@ -59,7 +63,7 @@ def prediction_for_clip(audio_path):
     })
 
     dataset = TestDataset(
-        df=test_df, 
+        df=test_df,
         clip=clip,
         cfg=CFG,
     )
@@ -88,10 +92,11 @@ def prediction_for_clip(audio_path):
 
     return classification_dict
 
+
 def process_new_audio(audio_path, export_dir):
     print(f"Processing: {audio_path}")
     classification_dict = prediction_for_clip(audio_path)
-    
+
     iot_name = Path(audio_path).parts[-3]  # Get IoT device ID from the path
     date = Path(audio_path).parts[-2]  # Get date from the path
     file_stem = Path(audio_path).stem
@@ -106,12 +111,13 @@ def process_new_audio(audio_path, export_dir):
         "date": date,
         "species": classification_dict  # Species classification per segment
     }
-    
+
     export_path = os.path.join(export_subdir, file_stem + "_results.json")
     with open(export_path, 'w') as json_file:
         json.dump(result_data, json_file, indent=4)
-    
+
     print(f"Done! Exported predictions for {audio_path} to {export_path}")
+
 
 class AudioFileHandler(FileSystemEventHandler):
     def on_created(self, event):
@@ -121,6 +127,7 @@ class AudioFileHandler(FileSystemEventHandler):
             if event.src_path.endswith(('.wav', '.ogg', '.mp3')):
                 process_new_audio(event.src_path, EXPORT_DIR)
 
+
 def monitor_directory(root_dir):
     event_handler = AudioFileHandler()
     observer = Observer()
@@ -128,12 +135,13 @@ def monitor_directory(root_dir):
     observer.start()
 
     print(f"Monitoring directory: {root_dir}")
-    
+
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
+
 
 monitor_directory(ROOT_AUDIO_DIR)
