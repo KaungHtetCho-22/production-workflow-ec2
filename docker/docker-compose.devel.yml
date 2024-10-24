@@ -17,7 +17,3 @@ services:
       - ${PWD}/app-data:/app/app-data
       - ${PWD}/weights/:/app/weights
     entrypoint: ["/bin/bash"]
-
-
-volumes:
-  db_data:

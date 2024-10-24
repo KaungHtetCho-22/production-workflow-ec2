@@ -38,6 +38,7 @@ cfg.hop_length = 512  # [320, 512]
 cfg.sample_rate = 32000
 cfg.secondary_coef = 0.0
 
+# TODO: this isn't correct, it must have name of insect as well
 cfg.target_columns = [
     'Abroscopus-superciliaris', 'Cyornis-whitei', 'Lanius-Schach', 'Psilopogon-asiaticus',
     'Alcedo-atthis', 'Dicrurus-leucophaeus', 'Merops-leschenaulti', 'Psilopogon-franklinii',

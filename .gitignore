@@ -2,3 +2,4 @@ __pycache__
 data/audio/
 test-biodiversity-audio/
 app-data/*
+weights/*
