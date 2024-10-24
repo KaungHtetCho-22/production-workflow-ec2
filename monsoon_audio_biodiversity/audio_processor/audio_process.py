@@ -18,8 +18,12 @@ from sqlmodel import create_session, RpiDevices, SpeciesDetection
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-# TODO: Load the model weights from the correct path
-# state_dict = torch.load('./weights/ait_bird_local_eca_nfnet_l0/fold_0_model.pt', map_location=device)['state_dict']
+weight_path = os.getenv('AUDIO_CLASSIFIER_WEIGHTS')
+if not weight_path:
+    raise Exception("Environment variable AUDIO_CLASSIFIER_WEIGHTS not set.")
+if not os.path.isfile(weight_path):
+    raise Exception(f"Model weights file not found: {weight_path}")
+state_dict = torch.load(weight_path, map_location='cpu')['state_dict']
 
 # Initialize the model
 model = AttModel(
