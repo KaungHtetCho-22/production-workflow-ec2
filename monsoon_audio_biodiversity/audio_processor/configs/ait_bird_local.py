@@ -10,7 +10,6 @@ cfg.apex = True  # [True, False]
 ######################
 cfg.seed = 42
 cfg.epochs = 200
-cfg.external = True  # [True, False]
 cfg.use_sampler = False  # [True, False]
 
 ######################
@@ -19,7 +18,6 @@ cfg.use_sampler = False  # [True, False]
 cfg.train_audio_dir = "./data/sounds/"
 cfg.train_df_dir = "./data/dataframes/"
 cfg.train_pkl_file = "ait_train_meta.pickle"
-cfg.nocall_pkl_file = "ff1010bird_metadata_v1_pseudo.pickle"
 cfg.short_noise_dir = "./data/external/esc50/use_label"
 cfg.background_noise_dir = "./data/external/zenodo_nocall_30sec"
 
@@ -38,7 +36,6 @@ cfg.hop_length = 512  # [320, 512]
 cfg.sample_rate = 32000
 cfg.secondary_coef = 0.0
 
-# TODO: this isn't correct, it must have name of insect as well
 cfg.target_columns = [
     'Abroscopus-superciliaris', 'Cyornis-whitei', 'Lanius-Schach', 'Psilopogon-asiaticus',
     'Alcedo-atthis', 'Dicrurus-leucophaeus', 'Merops-leschenaulti', 'Psilopogon-franklinii',
@@ -56,7 +53,23 @@ cfg.target_columns = [
     'Chrysocolaptes-guttacristatus', 'Hirundo-rustica', 'Phylloscopus-omeiensis', 'Urosphena-squameiceps',
     'Copsychus-malabaricus', 'Hypothymis-azurea', 'Phylloscopus-ricketti', 'Yungipicus-canicapillus',
     'Coracias-benghalensis', 'Hypsipetes-leucocephalus', 'Phylloscopus-tephrocephalus',
-    'Culicicapa-ceylonensis', 'Ixos-mcclellandii', 'Picumnus-innominatus', 'nocall'
+    'Culicicapa-ceylonensis', 'Ixos-mcclellandii', 'Picumnus-innominatus', 'nocall',
+    'Aleetacurvicosta', 'Atrapsaltacollina', 'Atrapsaltacorticina', 'Atrapsaltaencaustica',
+    'Cicadaorni', 'Clinopsaltaautumna', 'Cyclochilaaustralasiae', 'Diceroproctaeugraphica',
+    'Galangalabeculata', 'Neotibicenpruinosus', 'Platypleuracfcatenata', 'Platypleuraplumosa',
+    'Platypleurasp10', 'Platypleurasp12cfhirtipennis', 'Platypleurasp13', 'Popplepsaltaaeroides',
+    'Popplepsaltanotialis', 'Psaltodaplaga', 'Yoyettacelis', 'Yoyettarepetens', 'Chorthippusalbomarginatus',
+    'Chorthippusapricarius', 'Chorthippusbiguttulus', 'Chorthippusbrunneus', 'Chorthippusmollis',
+    'Chorthippusvagans', 'Chrysochraondispar', 'Gomphocerippusrufus', 'Gomphocerussibiricus',
+    'Myrmeleotettixmaculatus', 'Omocestuspetraeus', 'Omocestusrufipes', 'Omocestusviridulus',
+    'Pseudochorthippusmontanus', 'Pseudochorthippusparallelus', 'Stauroderusscalaris', 'Stenobothruslineatus',
+    'Stenobothrusstigmaticus', 'Achetadomesticus', 'Eumodicogryllusbordigalensis', 'Gryllusbimaculatus',
+    'Grylluscampestris', 'Melanogryllusdesertus', 'Oecanthuspellucens', 'Barbitistesyersini', 'Bicoloranabicolor',
+    'Conocephalusdorsalis', 'Conocephalusfuscus', 'Decticusverrucivorus', 'Ephippigerdiurnus', 'Eupholidopteraschmidti',
+    'Gampsocleisglabra', 'Leptophyespunctatissima', 'Metriopterabrachyptera', 'Phaneropterafalcata', 'Phaneropteranana',
+    'Pholidopteraaptera', 'Pholidopteragriseoaptera', 'Pholidopteralittoralis', 'Platycleisalbopunctata',
+    'Roeselianaroeselii', 'Ruspolianitidula', 'Tettigoniacantans', 'Tettigoniaviridissima',
+    'Tylopsislilifolia', 'Nemobiussylvestris'
 ]
 
 cfg.bird2id = {b: i for i, b in enumerate(cfg.target_columns)}
@@ -98,3 +111,5 @@ cfg.mixup_p = 1.0
 cfg.pretrained_weights = True
 cfg.pretrained_path = './pretrained/fold_0_model.bin'
 cfg.model_output_path = f"./out_weights/{cfg.exp_name}_{cfg.backbone}"
+
+print(len(cfg.target_columns))
