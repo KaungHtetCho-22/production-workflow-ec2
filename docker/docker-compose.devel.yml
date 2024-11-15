@@ -4,7 +4,7 @@ services:
     container_name: audio_processor
     stdin_open: true
     tty: true
-    shm_size: '1g'
+    shm_size: '512m'
     working_dir: ${PWD}
     environment:
       - PYTHONPATH=${PWD}
