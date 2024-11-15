@@ -23,7 +23,7 @@ if not weight_path:
     raise Exception("Environment variable AUDIO_CLASSIFIER_WEIGHTS not set.")
 if not os.path.isfile(weight_path):
     raise Exception(f"Model weights file not found: {weight_path}")
-state_dict = torch.load(weight_path, map_location='cpu')['state_dict']
+state_dict = torch.load(weight_path, map_location='cpu', weights_only=False)['state_dict']
 
 # Initialize the model
 model = AttModel(

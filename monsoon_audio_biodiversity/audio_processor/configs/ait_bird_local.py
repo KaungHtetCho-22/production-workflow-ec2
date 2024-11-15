@@ -112,4 +112,4 @@ cfg.pretrained_weights = True
 cfg.pretrained_path = './pretrained/fold_0_model.bin'
 cfg.model_output_path = f"./out_weights/{cfg.exp_name}_{cfg.backbone}"
 
-print(len(cfg.target_columns))
+print(f'There are {len(cfg.target_columns)} species to predict including no species.')
