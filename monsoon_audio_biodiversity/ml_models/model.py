@@ -241,20 +241,6 @@ class InferenceAudioClassifierModel(nn.Module):
 
         self.cfg = cfg
 
-        self.logmelspec_extractor = torch.jit.script(nn.Sequential(
-            MelSpectrogram(
-                sample_rate=self.cfg.sample_rate,
-                n_mels=self.cfg.n_mels,
-                f_min=self.cfg.fmin,
-                f_max=self.cfg.fmax,
-                n_fft=self.cfg.n_fft,
-                hop_length=self.cfg.hop_length,
-                normalized=True,
-            ),
-            AmplitudeToDB(top_db=80.0),
-            NormalizeMelSpec(),
-        ), example_inputs=[(torch.randn(1, 32000 * 5))])
-
         base_model = timm.create_model(
             backbone,
             features_only=False,
@@ -285,8 +271,6 @@ class InferenceAudioClassifierModel(nn.Module):
         self.device = device
 
     def forward(self, x):
-        # get log mel spectrogram and add channel dimension to be 1
-        x = self.logmelspec_extractor(x)[:, None]
         x = self.backbone(x)
         x = self.global_pool(x)
         x = x[:, :, 0, 0]
