@@ -7,7 +7,7 @@ from torch.distributions import Beta
 import timm
 
 
-def gem(x, p=3, eps=1e-6):
+def gem(x: torch.Tensor, p :torch.Tensor, eps :float=1e-6):
     return F.avg_pool2d(x.clamp(min=eps).pow(p), (x.size(-2), x.size(-1))).pow(1.0 / p)
 
 
@@ -17,7 +17,7 @@ class GeM(nn.Module):
         self.p = torch.nn.Parameter(torch.ones(1) * p)
         self.eps = eps
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return gem(x, p=self.p, eps=self.eps)
 
 
@@ -40,7 +40,7 @@ class NormalizeMelSpec(nn.Module):
         super().__init__()
         self.eps = eps
 
-    def forward(self, X):
+    def forward(self, X: torch.Tensor):
         mean = X.mean((1, 2), keepdim=True)
         std = X.std((1, 2), keepdim=True)
         Xstd = (X - mean) / (std + self.eps)
@@ -193,3 +193,73 @@ class AttModel(nn.Module):
         logit = sum([self.head(dropout(x)) for dropout in self.dropouts]) / 5
 
         return {"logit": logit, "target": y}
+
+
+class InferenceAudioClassifierModel(nn.Module):
+    def __init__(
+        self,
+        backbone="resnet34",
+        num_class=397,
+        train_period=15.0,
+        infer_period=5.0,
+        in_chans=1,
+        cfg=None,
+        training=True,
+        device=torch.device("cpu")
+    ):
+        super().__init__()
+
+        self.cfg = cfg
+
+        self.logmelspec_extractor = nn.Sequential(
+            MelSpectrogram(
+                sample_rate=self.cfg.sample_rate,
+                n_mels=self.cfg.n_mels,
+                f_min=self.cfg.fmin,
+                f_max=self.cfg.fmax,
+                n_fft=self.cfg.n_fft,
+                hop_length=self.cfg.hop_length,
+                normalized=True,
+            ),
+            AmplitudeToDB(top_db=80.0),
+            NormalizeMelSpec(),
+        )
+
+        base_model = timm.create_model(
+            backbone,
+            features_only=False,
+            pretrained=self.cfg.use_imagenet_weights and training,
+            in_chans=self.cfg.in_channels,
+        )
+
+        layers = list(base_model.children())[:-2]
+        self.backbone = nn.Sequential(*layers)
+        if "efficientnet" in self.cfg.backbone:
+            dense_input = base_model.num_features
+        elif "swin" in self.cfg.backbone:
+            dense_input = base_model.num_features
+        elif hasattr(base_model, "fc"):
+            dense_input = base_model.fc.in_features
+        else:
+            dense_input = base_model.feature_info[-1]["num_chs"]
+
+        self.train_period = train_period
+        self.infer_period = infer_period
+
+        self.factor = int(self.train_period / self.infer_period)
+        self.global_pool = GeM()
+        # self.dropouts = nn.ModuleList([nn.Dropout(p) for p in np.linspace(0.1, 0.5, 5)])
+        self.head = nn.Linear(dense_input, num_class)
+
+        self.training = training
+        self.device = device
+
+    def forward(self, x):
+        # get log mel spectrogram and add channel dimension to be 1
+        x = self.logmelspec_extractor(x)[:, None]
+        x = self.backbone(x)
+        x = self.global_pool(x)
+        x = x[:, :, 0, 0]
+        logit = self.head(x)
+
+        return logit
