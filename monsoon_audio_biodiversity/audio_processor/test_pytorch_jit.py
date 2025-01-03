@@ -22,15 +22,12 @@ model = InferenceAudioClassifierModel(
     training=False,
     device=device
 )
-
-model = model.to(device)
-model.logmelspec_extractor = model.logmelspec_extractor.to(device)
 model.eval()
 print("Model initialized successfully.")
 
 # Apply JIT compilation
 try:
-    model = torch.jit.script(model, example_inputs=[inp_clip])
+    model = torch.jit.trace_module(model, inputs={'forward': inp_clip})
     print("Model JIT-compiled successfully.")
 except Exception as e:
     print(f"Failed to JIT-compile the model: {e}")
