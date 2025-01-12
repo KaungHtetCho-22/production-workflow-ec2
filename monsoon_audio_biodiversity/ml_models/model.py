@@ -245,6 +245,7 @@ class InferenceAudioClassifierModel(nn.Module):
             backbone,
             features_only=False,
             pretrained=self.cfg.use_imagenet_weights and training,
+            scriptable=True,
             in_chans=self.cfg.in_channels,
         )
 
@@ -259,10 +260,6 @@ class InferenceAudioClassifierModel(nn.Module):
         else:
             dense_input = base_model.feature_info[-1]["num_chs"]
 
-        self.train_period = train_period
-        self.infer_period = infer_period
-
-        self.factor = int(self.train_period / self.infer_period)
         self.global_pool = GeM()
         # self.dropouts = nn.ModuleList([nn.Dropout(p) for p in np.linspace(0.1, 0.5, 5)])
         self.head = nn.Linear(dense_input, num_class)
@@ -273,7 +270,7 @@ class InferenceAudioClassifierModel(nn.Module):
     def forward(self, x):
         x = self.backbone(x)
         x = self.global_pool(x)
-        x = x[:, :, 0, 0]
+        x = x.view((x.size(0), -1))
         logit = self.head(x)
 
         return logit

@@ -1,4 +1,4 @@
-FROM python:3.12 AS devel
+FROM python:3.11 AS devel
 
 RUN apt-get update && apt-get install --no-install-recommends -y sudo
 
