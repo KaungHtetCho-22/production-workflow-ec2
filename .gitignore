@@ -3,3 +3,4 @@ data/audio/
 test-biodiversity-audio/
 app-data/*
 weights/*
+tuning_logs/*
