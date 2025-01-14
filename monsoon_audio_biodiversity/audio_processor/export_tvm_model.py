@@ -46,6 +46,7 @@ elif args.target == 'rasp3b':
     target = tvm.target.arm_cpu('rasp3b', options='-num-cores 4')
 
 mod = relax.get_pipeline("static_shape_tuning", target=target, total_trials=args.n_trials)(mod)
+# mod = relax.get_pipeline("zero")(mod)
 
 ex = relax.build(mod, target)
 
@@ -53,5 +54,5 @@ cpu_cores_txt = f'-{args.n_cpu_cores}' if args.target == 'cpu' else ''
 output_file_name = f'{args.target}{cpu_cores_txt}_audio_classifier_model.so'
 output_file_path = os.path.join(args.output_dir, output_file_name)
 
-ex.export_library(output_file_path)
+ex.export_library(output_file_path, workspace_dir='export-workdir')
 print(f"TVM model exported successfully to {output_file_path}!")
