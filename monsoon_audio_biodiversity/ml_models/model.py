@@ -274,3 +274,23 @@ class InferenceAudioClassifierModel(nn.Module):
         logit = self.head(x)
 
         return logit
+
+
+def get_waveform_transform(cfg, device=torch.device('cpu')):
+    logmelspec_extractor = nn.Sequential(
+        MelSpectrogram(
+            sample_rate=cfg.sample_rate,
+            n_mels=cfg.n_mels,
+            f_min=cfg.fmin,
+            f_max=cfg.fmax,
+            n_fft=cfg.n_fft,
+            hop_length=cfg.hop_length,
+            normalized=True,
+        ),
+        AmplitudeToDB(top_db=80.0),
+        NormalizeMelSpec(),
+    )
+
+    logmelspec_extractor.to(device)
+
+    return logmelspec_extractor

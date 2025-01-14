@@ -1,17 +1,17 @@
 import librosa
 import numpy as np
-import onnx
 import torch
 import torch.onnx
 import torch.nn as nn
 import tvm
-import tvm.relax as relax
-from tvm.relax.frontend.onnx import from_onnx
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 
 from monsoon_audio_biodiversity.ml_models.model import NormalizeMelSpec, InferenceAudioClassifierModel
 from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
-
+try:
+    import tvm.relax as relax
+except ImportError:
+    import tvm.runtime.relax_vm as relax
 
 torch.set_grad_enabled(False)
 
