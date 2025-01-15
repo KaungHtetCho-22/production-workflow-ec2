@@ -39,14 +39,15 @@ simplified_onnx_model = onnx.load(args.onnx_model)
 shape_list = {'input0': (1, 1, 128, 313)}
 mod = from_onnx(simplified_onnx_model, shape_list)
 
+export_kwargs = {}
 if args.target == 'cpu':
     target = tvm.target.Target(f'llvm -num-cores {args.n_cpu_cores}')
 elif args.target == 'rasp3b':
     # must use all 4 cores to get maximum speed
-    target = tvm.target.arm_cpu('rasp3b', options='-num-cores 4')
+    target = 'llvm -mtriple=aarch64-linux-gnu -mattr=+neon -model=bcm2837 -num-cores 4'
+    export_kwargs = {'options': ['-fuse-ld=lld', '-mfpu=neon', '-mcpu=bcm2837', '-target', 'aarch64-linux-gnu', '-v']}
 
 mod = relax.get_pipeline("static_shape_tuning", target=target, total_trials=args.n_trials)(mod)
-# mod = relax.get_pipeline("zero")(mod)
 
 ex = relax.build(mod, target)
 
@@ -54,5 +55,5 @@ cpu_cores_txt = f'-{args.n_cpu_cores}' if args.target == 'cpu' else ''
 output_file_name = f'{args.target}{cpu_cores_txt}_audio_classifier_model.so'
 output_file_path = os.path.join(args.output_dir, output_file_name)
 
-ex.export_library(output_file_path, workspace_dir='export-workdir')
+ex.export_library(output_file_path, workspace_dir='export-workdir', **export_kwargs)
 print(f"TVM model exported successfully to {output_file_path}!")
