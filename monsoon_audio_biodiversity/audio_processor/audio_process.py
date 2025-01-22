@@ -38,6 +38,7 @@ model = AttModel(
 model.load_state_dict(state_dict)
 model = model.to(device)
 model.logmelspec_extractor = model.logmelspec_extractor.to(device)
+model.eval()
 print("Model initialized successfully.")
 
 
