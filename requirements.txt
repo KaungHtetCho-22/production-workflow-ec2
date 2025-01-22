@@ -1,7 +1,7 @@
 librosa==0.10.2.post1
 pandas~=2.0
 sqlalchemy~=2.0.0
-timm
+timm~=1.0.0
 tqdm
 onnx
 watchdog~=5.0

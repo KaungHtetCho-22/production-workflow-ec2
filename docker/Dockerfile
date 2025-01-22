@@ -1,4 +1,4 @@
-FROM python:3.12 AS devel
+FROM python:3.12-bookworm⁠ AS devel
 
 ENV TZ=Asia/Bangkok
 
@@ -7,17 +7,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y sudo git curl w
 
 # tvm dependencies
 RUN apt-get install -y make cmake libpolly-14-dev llvm clang libc++-dev libc++abi-dev lld zlib1g-dev
-# RUN apt-get install -y make cmake zlib1g-dev
-
-# WORKDIR /llvm-installer
-
-# RUN curl -L -O https://apt.llvm.org/llvm.sh && \
-#     chmod +x llvm.sh && \
-#     sudo ./llvm.sh 15 all
-
-# RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-15 100 && \
-#     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-15 100 && \
-#     update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-15 100
 
 # # Installing TVM
 WORKDIR /tvm-builder
@@ -40,10 +29,10 @@ RUN cd tvm && rm -rf build && mkdir build && cd build && \
     export TVM_LIBRARY_PATH=/tvm-builder/tvm/build && \
     pip install -e /tvm-builder/tvm/python
 
-# WORKDIR /arm-toolchain
+WORKDIR /arm-toolchain
 
-# RUN curl -O -L https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz && \
-#     tar -xvf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+RUN curl -O -L https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz && \
+    tar -xvf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
 
 ARG USERNAME=monsoon
 ARG USER_UID=1000
