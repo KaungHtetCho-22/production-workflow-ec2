@@ -6,8 +6,8 @@ import torch.nn as nn
 import tvm
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 
-from monsoon_audio_biodiversity.ml_models.model import NormalizeMelSpec, InferenceAudioClassifierModel
-from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
+from monsoon_biodiversity_common.model import NormalizeMelSpec, InferenceAttModel
+from monsoon_biodiversity_common.config import cfg as CFG
 try:
     import tvm.relax as relax
 except ImportError:
@@ -37,7 +37,7 @@ logmelspec_extractor = nn.Sequential(
     NormalizeMelSpec(),
 )
 
-model = InferenceAudioClassifierModel(
+model = InferenceAttModel(
     backbone=CFG.backbone,
     num_class=CFG.num_classes,
     infer_period=5,

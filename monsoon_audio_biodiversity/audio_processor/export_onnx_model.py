@@ -8,8 +8,8 @@ import torch.nn as nn
 from torchaudio.transforms import MelSpectrogram, AmplitudeToDB
 import onnxruntime
 
-from monsoon_audio_biodiversity.ml_models.model import InferenceAudioClassifierModel, NormalizeMelSpec
-from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
+from monsoon_biodiversity_common.model import InferenceAttModel, NormalizeMelSpec
+from monsoon_biodiversity_common.config import cfg as CFG
 
 
 torch.set_grad_enabled(False)
@@ -35,7 +35,7 @@ logmelspec_extractor = nn.Sequential(
     NormalizeMelSpec(),
 )
 
-model = InferenceAudioClassifierModel(
+model = InferenceAttModel(
     backbone=CFG.backbone,
     num_class=CFG.num_classes,
     infer_period=5,

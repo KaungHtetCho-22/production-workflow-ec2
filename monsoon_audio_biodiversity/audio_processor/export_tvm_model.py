@@ -7,8 +7,8 @@ import tvm
 import tvm.relax as relax
 from tvm.relax.frontend.onnx import from_onnx
 
-from monsoon_audio_biodiversity.ml_models.model import get_waveform_transform
-from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
+from monsoon_biodiversity_common.model import get_waveform_transform
+from monsoon_biodiversity_common.config import cfg as CFG
 
 
 parser = argparse.ArgumentParser()
