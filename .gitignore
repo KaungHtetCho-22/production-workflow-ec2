@@ -4,3 +4,4 @@ test-biodiversity-audio/
 app-data/*
 weights/*
 tuning_logs/*
+export-workdir/
