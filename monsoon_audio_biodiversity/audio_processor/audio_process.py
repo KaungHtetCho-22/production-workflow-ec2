@@ -12,8 +12,8 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from dataset import TestDataset
-from monsoon_audio_biodiversity.audio_processor.configs.ait_bird_local import cfg as CFG
-from monsoon_audio_biodiversity.ml_models.model import AttModel
+from monsoon_biodiversity_common.config import cfg as CFG
+from monsoon_biodiversity_common.model import AttModel
 from sqlmodel import create_session, RpiDevices, SpeciesDetection
 
 
