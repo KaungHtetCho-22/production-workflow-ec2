@@ -2,6 +2,17 @@
 
 This is the repository for the production workflow on AWS-EC2 for the Biodiversity application.
 
+## Setup the repository with submodule
+When cloning this repository to local computer, you must specify recursive option to clone submodule as well.
+```bash
+git clone --recursive git@github.com:KaungHtetCho-22/production-workflow-ec2.git
+```
+If you already have local repository on your computer, and you still don't have `monsoon_biodiversity_common` submodule/directory yet,
+pull the latest commit, and use the following command to init the submodule
+```bash
+git submodule update --init
+```
+
 ## System Workflow
 
 ![System Workflow](diagram.png)
@@ -48,3 +59,4 @@ python3 audio_processor.py
 
 docker exec -it biosound_db /bin/bash
 mysql -h localhost -P 3306 -u biosound_user -p biosound_password
+```
